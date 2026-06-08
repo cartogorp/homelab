@@ -12,3 +12,8 @@ services:
       - TZ=UTC
     # safer defaults
     user: "1000:1000"
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "video"
+      - "render"
