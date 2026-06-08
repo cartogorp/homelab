@@ -1,0 +1,14 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"
+    volumes:
+      - /srv/appdata/jellyfin:/config
+      - /srv/media:/media
+    environment:
+      - TZ=America/Toronto
+    # safer defaults
+    user: "1000:1000"
