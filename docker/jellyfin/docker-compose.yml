@@ -9,6 +9,6 @@ services:
       - /srv/appdata/jellyfin:/config
       - /srv/media:/media
     environment:
-      - TZ=America/Toronto
+      - TZ=UTC
     # safer defaults
     user: "1000:1000"
