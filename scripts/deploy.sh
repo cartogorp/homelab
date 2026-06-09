@@ -80,7 +80,7 @@ cd /srv/docker
 echo "==> Pulling latest from git..."
 git pull
 
-COMPOSE_FILE="/srv/docker/docker/$SERVICE/docker-compose.yml"
+COMPOSE_FILE="/srv/docker/$SERVICE/docker-compose.yml"
 
 echo "Using compose file: \$COMPOSE_FILE"
 
