@@ -82,7 +82,7 @@ cd /srv/docker
 echo "==> Pulling latest from git..."
 git pull
 
-COMPOSE_FILE="docker/$SERVICE/docker-compose.yml"
+COMPOSE_FILE="$SERVICE/docker-compose.yml"
 
 if [ ! -f "\$COMPOSE_FILE" ]; then
   echo "ERROR: Compose file not found: \$COMPOSE_FILE"
