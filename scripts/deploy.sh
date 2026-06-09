@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SERVER="homelab@whalesea"
+LOCAL_DIR="./docker"
 REMOTE_DIR="/srv/docker"
 
 SERVICE="${1:-all}"
@@ -9,7 +10,7 @@ SERVICE="${1:-all}"
 echo "==> Deploy mode: $SERVICE"
 
 # -----------------------------
-# Git safety checks (LOCAL)
+# Git safety checks (LOCAL ONLY)
 # -----------------------------
 echo "==> Checking local git state..."
 
@@ -37,23 +38,25 @@ fi
 echo "==> Git state OK"
 
 # -----------------------------
-# DEPLOY ALL
+# DEPLOY ALL SERVICES
 # -----------------------------
 if [[ "$SERVICE" == "all" ]]; then
 
-  echo "==> Full deploy (git pull + restart all stacks)"
+  echo "==> Full rsync deploy (authoritative sync)"
+
+  rsync -avz --delete \
+    --exclude='.git' \
+    "$LOCAL_DIR/" \
+    "$SERVER:$REMOTE_DIR/"
 
   ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
 
 cd /srv/docker
 
-echo "==> Pulling latest from git..."
-git pull
+echo "==> Rebuilding all compose stacks..."
 
-echo "==> Restarting all compose stacks..."
-
-for dir in docker/*/ ; do
+for dir in */ ; do
   if [ -f "$dir/docker-compose.yml" ]; then
     echo "-> $dir"
     docker compose -f "$dir/docker-compose.yml" up -d --remove-orphans
@@ -64,6 +67,7 @@ echo "==> Container status:"
 docker ps --format "table {{.Names}}\t{{.Status}}"
 EOF
 
+  echo "==> Deployment complete"
   exit 0
 fi
 
@@ -72,27 +76,28 @@ fi
 # -----------------------------
 echo "==> Service deploy: $SERVICE"
 
-ssh "$SERVER" bash -s << EOF
-set -euo pipefail
-
-cd /srv/docker
-
-echo "==> Pulling latest from git..."
-git pull
-
-COMPOSE_FILE="/srv/docker/$SERVICE/docker-compose.yml"
-
-echo "Using compose file: \$COMPOSE_FILE"
-
-if [ ! -f "\$COMPOSE_FILE" ]; then
-  echo "ERROR: Compose file not found: \$COMPOSE_FILE"
+if [[ ! -d "$LOCAL_DIR/$SERVICE" ]]; then
+  echo "ERROR: Service not found locally: $SERVICE"
   exit 1
 fi
 
-echo "==> Deploying \$SERVICE"
-docker compose -f "\$COMPOSE_FILE" up -d --remove-orphans
+rsync -avz --delete \
+  "$LOCAL_DIR/$SERVICE/" \
+  "$SERVER:$REMOTE_DIR/$SERVICE/"
 
-echo "==> Status:"
+ssh "$SERVER" bash -s << EOF
+set -euo pipefail
+
+cd /srv/docker/$SERVICE
+
+if [ ! -f "docker-compose.yml" ]; then
+  echo "ERROR: docker-compose.yml not found for $SERVICE"
+  exit 1
+fi
+
+echo "==> Rebuilding $SERVICE"
+docker compose up -d --remove-orphans
+
 docker ps --filter name=$SERVICE
 EOF
 
