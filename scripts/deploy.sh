@@ -14,7 +14,6 @@ for arg in "$@"; do
   case $arg in
     --dry)
       DRY_RUN=true
-      shift
       ;;
     *)
       SERVICE="$arg"
@@ -26,7 +25,7 @@ echo "==> Deploy mode: $SERVICE"
 [[ "$DRY_RUN" == true ]] && echo "==> DRY RUN ENABLED (no changes will be made)"
 
 # -----------------------------
-# Git safety checks
+# Git safety checks (LOCAL)
 # -----------------------------
 echo "==> Checking git state..."
 
@@ -63,7 +62,6 @@ echo "==> Git state OK"
 # DRY RUN MODE
 # -----------------------------
 if [[ "$DRY_RUN" == true ]]; then
-
   echo ""
   echo "==== DRY RUN SUMMARY ===="
   echo "Server: $SERVER"
@@ -73,18 +71,17 @@ if [[ "$DRY_RUN" == true ]]; then
 
   if [[ "$SERVICE" == "all" ]]; then
     echo "[ALL SERVICES MODE]"
-    echo "Would rsync: ./docker/ -> $SERVER:$REMOTE_DIR (WITH --delete)"
-    echo "Would restart all compose stacks on server"
+    echo "Would: git pull on server"
+    echo "Would: restart ALL compose stacks"
   else
     echo "[SERVICE MODE]"
-    echo "Would rsync: ./docker/$SERVICE -> $SERVER:$REMOTE_DIR/$SERVICE"
-    echo "Would restart ONLY service: $SERVICE"
+    echo "Would: git pull on server"
+    echo "Would: restart ONLY service: $SERVICE"
   fi
 
   echo ""
   echo "Git state:"
   git log --oneline -5
-
   exit 0
 fi
 
@@ -93,46 +90,53 @@ fi
 # -----------------------------
 if [[ "$SERVICE" == "all" ]]; then
 
-  echo "==> Full deploy (authoritative sync)"
-
-  rsync -av --delete --exclude='.git' ./docker/ "$SERVER:$REMOTE_DIR/"
+  echo "==> Full deploy"
 
   ssh "$SERVER" bash -s << 'EOF'
-    set -euo pipefail
-    cd /srv/docker
+set -euo pipefail
 
-    for dir in */ ; do
-      if [ -f "$dir/docker-compose.yml" ]; then
-        echo "-> Updating $dir"
-        cd "$dir"
-        docker compose pull
-        docker compose up -d --remove-orphans
-        cd ..
-      fi
-    done
+cd /srv/docker
 
-    docker ps --format "table {{.Names}}\t{{.Status}}"
+echo "==> Pulling latest changes..."
+git pull
+
+echo "==> Rebuilding all stacks..."
+
+for dir in */ ; do
+  if [ -f "$dir/docker-compose.yml" ]; then
+    echo "-> Updating $dir"
+    docker compose -f "$dir/docker-compose.yml" up -d --remove-orphans
+  fi
+done
+
+echo "==> Deployment complete"
+docker ps --format "table {{.Names}}\t{{.Status}}"
 EOF
 
 else
 
-  echo "==> Service deploy (safe mode): $SERVICE"
-
-  if [[ ! -d "./docker/$SERVICE" ]]; then
-    echo "ERROR: Service '$SERVICE' not found"
-    exit 1
-  fi
-
-  rsync -av ./docker/$SERVICE/ "$SERVER:$REMOTE_DIR/$SERVICE/"
+  echo "==> Service deploy: $SERVICE"
 
   ssh "$SERVER" bash -s << EOF
-    set -euo pipefail
-    cd /srv/docker/$SERVICE
+set -euo pipefail
 
-    docker compose pull
-    docker compose up -d --remove-orphans
+cd /srv/docker
 
-    docker ps --filter name=$SERVICE
+echo "==> Pulling latest changes..."
+git pull
+
+if [ ! -d "$SERVICE" ]; then
+  echo "ERROR: Service '$SERVICE' not found in /srv/docker"
+  exit 1
+fi
+
+cd "$SERVICE"
+
+echo "==> Restarting service: $SERVICE"
+docker compose up -d --remove-orphans
+
+echo "==> Done"
+docker ps --filter name="$SERVICE"
 EOF
 
 fi
