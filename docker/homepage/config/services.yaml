@@ -2,17 +2,29 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/services/
 
-- My First Group:
-    - My First Service:
-        href: http://localhost/
-        description: Homepage is awesome
+- Media:
+    - Jellyfin:
+        href: http://whalesea:8096
+        description: Media server
 
-- My Second Group:
-    - My Second Service:
-        href: http://localhost/
-        description: Homepage is the best
+    - Sonarr:
+        href: http://whalesea:8989
+        description: TV automation
 
-- My Third Group:
-    - My Third Service:
-        href: http://localhost/
-        description: Homepage is 😎
+    - Radarr:
+        href: http://whalesea:7878
+        description: Movie automation
+
+    - Prowlarr:
+        href: http://whalesea:9696
+        description: Indexer manager
+
+- Downloads:
+    - qBittorrent:
+        href: http://whalesea:8080
+        description: Torrent client (VPN-only)
+
+- Network:
+    - Gluetun:
+        href: http://whalesea:8000
+        description: VPN container dashboard (if enabled)

@@ -7,6 +7,11 @@
     memory: true
     disk: /
 
-- search:
-    provider: duckduckgo
-    target: _blank
+- system:
+    title: Server
+    host: whalesea
+
+- datetime:
+    format:
+      timeStyle: short
+      dateStyle: medium
