@@ -1,0 +1,15 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - 3000:3000
+    volumes:
+      - /srv/docker/homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+      - HOMEPAGE_ALLOWED_HOSTS=whalesea:3000,whalesea,homelab,localhost:3000,localhost,127.0.0.1:3000, 127.0.0.1
+    restart: unless-stopped
