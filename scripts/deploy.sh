@@ -5,7 +5,6 @@ SERVER="homelab@whalesea"
 REMOTE_DIR="/srv/docker"
 
 SERVICE="${1:-all}"
-DRY_RUN="${DRY_RUN:-false}"
 
 echo "==> Deploy mode: $SERVICE"
 
@@ -38,11 +37,11 @@ fi
 echo "==> Git state OK"
 
 # -----------------------------
-# DEPLOY ALL (recommended path)
+# DEPLOY ALL
 # -----------------------------
 if [[ "$SERVICE" == "all" ]]; then
 
-  echo "==> Full deploy (git pull + restart stacks)"
+  echo "==> Full deploy (git pull + restart all stacks)"
 
   ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
@@ -54,7 +53,6 @@ git pull
 
 echo "==> Restarting all compose stacks..."
 
-# Only directories containing compose files
 for dir in docker/*/ ; do
   if [ -f "$dir/docker-compose.yml" ]; then
     echo "-> $dir"
@@ -82,9 +80,7 @@ cd /srv/docker
 echo "==> Pulling latest from git..."
 git pull
 
-REPO_ROOT="$(pwd)"
-
-COMPOSE_FILE="$REPO_ROOT/docker/$SERVICE/docker-compose.yml"
+COMPOSE_FILE="/srv/docker/docker/$SERVICE/docker-compose.yml"
 
 echo "Using compose file: \$COMPOSE_FILE"
 
