@@ -82,7 +82,11 @@ cd /srv/docker
 echo "==> Pulling latest from git..."
 git pull
 
-COMPOSE_FILE="$SERVICE/docker-compose.yml"
+REPO_ROOT="$(pwd)"
+
+COMPOSE_FILE="$REPO_ROOT/docker/$SERVICE/docker-compose.yml"
+
+echo "Using compose file: \$COMPOSE_FILE"
 
 if [ ! -f "\$COMPOSE_FILE" ]; then
   echo "ERROR: Compose file not found: \$COMPOSE_FILE"
