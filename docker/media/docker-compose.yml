@@ -53,6 +53,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Toronto
+      - SABNZBD__HOST_WHITELIST=0.0.0.0/0
     volumes:
       - /srv/appdata/sabnzbd:/config
       - /srv/media/downloads:/downloads
