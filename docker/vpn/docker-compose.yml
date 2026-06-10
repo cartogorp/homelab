@@ -34,4 +34,5 @@ services:
     volumes:
       - /srv/appdata/qbittorrent:/config
       - /srv/media/downloads:/downloads
+      - /srv/media:/srv:media
     restart: unless-stopped
