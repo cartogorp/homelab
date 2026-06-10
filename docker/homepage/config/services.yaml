@@ -22,7 +22,7 @@
         container: radarr
         widget:
           type: radarr
-          url: http://whalesea:7878
+          url: http://192.168.86.144:7878
           key: 6486f3c902884e8e9ba33c4a13e5eec0
 
     - Prowlarr:
