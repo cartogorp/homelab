@@ -20,6 +20,10 @@
         server: my-docker
         description: Movie automation
         container: radarr
+        widget:
+          type: radarr
+          url: http://radarr:7878
+          key: 6486f3c902884e8e9ba33c4a13e5eec0
 
     - Prowlarr:
         href: http://whalesea:9696
