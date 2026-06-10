@@ -5,26 +5,45 @@
 - Media:
     - Jellyfin:
         href: http://whalesea:8096
+        server: my-docker
         description: Media server
+        container: jellyfin
 
     - Sonarr:
         href: http://whalesea:8989
+        server: my-docker
         description: TV automation
+        container: sonarr
 
     - Radarr:
         href: http://whalesea:7878
+        server: my-docker
         description: Movie automation
+        container: radarr
 
     - Prowlarr:
         href: http://whalesea:9696
+        server: my-docker
         description: Indexer manager
+        container: prowlarr
 
 - Downloads:
     - qBittorrent:
         href: http://whalesea:8080
+        server: my-docker
         description: Torrent client (VPN-only)
+        container: qbittorrent
 
 - Network:
     - Gluetun:
         href: http://whalesea:8000
+        server: my-docker
         description: VPN container dashboard (if enabled)
+        container: gluetun
+
+- Infrastructure:
+    - Homepage:
+        href: http://whalesea:3000
+        description: Dashboard
+        server: my-docker
+        container: homepage
