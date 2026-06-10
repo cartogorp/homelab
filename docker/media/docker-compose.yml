@@ -8,7 +8,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/sonarr:/config
-      - /srv/media:/media
+      - /srv/media:/srv/media
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -22,7 +22,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/radarr:/config
-      - /srv/media:/media
+      - /srv/media:/srv/media
     ports:
       - "7878:7878"
     restart: unless-stopped
