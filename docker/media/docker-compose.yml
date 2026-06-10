@@ -12,6 +12,8 @@ services:
     ports:
       - "8989:8989"
     restart: unless-stopped
+    networks:
+      - media-net
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -26,6 +28,8 @@ services:
     ports:
       - "7878:7878"
     restart: unless-stopped
+    networks:
+      - media-net
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -39,21 +43,25 @@ services:
     ports:
       - "9696:9696"
     restart: unless-stopped
+    networks:
+      - media-net
 
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
-
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Toronto
-
     volumes:
       - /srv/appdata/sabnzbd:/config
       - /srv/media/downloads:/downloads
-
     ports:
-      - 8085:8080
-
+      - "8085:8080"
     restart: unless-stopped
+    networks:
+      - media-net
+
+networks:
+  media-net:
+    external: true
