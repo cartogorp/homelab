@@ -6,6 +6,9 @@ services:
     ports:
       - "127.0.0.1:8081:80"
 
+    environment:
+    - FB_DATABASE=/database/filebrowser.db 
+
     volumes:
       - /srv/storage:/srv
       - /srv/appdata/filebrowser/database:/database
