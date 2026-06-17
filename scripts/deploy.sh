@@ -2,15 +2,19 @@
 set -euo pipefail
 
 SERVER="homelab@whalesea"
-LOCAL_DIR="./docker"
-REMOTE_DIR="/srv/docker"
+
+LOCAL_DOCKER_DIR="./docker"
+REMOTE_DOCKER_DIR="/srv/docker"
+
+LOCAL_SERVICES_DIR="./services"
+REMOTE_SERVICES_DIR="/opt"
 
 SERVICE="${1:-all}"
 
 echo "==> Deploy mode: $SERVICE"
 
 # -----------------------------
-# Git safety checks (LOCAL ONLY)
+# Git safety checks
 # -----------------------------
 echo "==> Checking local git state..."
 
@@ -38,67 +42,123 @@ fi
 echo "==> Git state OK"
 
 # -----------------------------
-# DEPLOY ALL SERVICES
+# ALL DEPLOY
 # -----------------------------
 if [[ "$SERVICE" == "all" ]]; then
 
-  echo "==> Full rsync deploy (authoritative sync)"
+  echo "==> Deploying ALL docker + services"
+
+  "$0" docker
+  "$0" services
+
+  echo "==> Full deploy complete"
+  exit 0
+fi
+
+# -----------------------------
+# DOCKER MODE (deploy all docker stacks)
+# -----------------------------
+if [[ "$SERVICE" == "docker" ]]; then
+
+  echo "==> Deploying all docker services"
 
   rsync -avz --delete \
     --exclude='.git' \
-    "$LOCAL_DIR/" \
-    "$SERVER:$REMOTE_DIR/"
+    "$LOCAL_DOCKER_DIR/" \
+    "$SERVER:$REMOTE_DOCKER_DIR/"
 
   ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
 
 cd /srv/docker
 
-echo "==> Rebuilding all compose stacks..."
-
 for dir in */ ; do
   if [ -f "$dir/docker-compose.yml" ]; then
-    echo "-> $dir"
+    echo "-> restarting $dir"
     docker compose -f "$dir/docker-compose.yml" up -d --remove-orphans
   fi
 done
-
-echo "==> Container status:"
-docker ps --format "table {{.Names}}\t{{.Status}}"
 EOF
 
-  echo "==> Deployment complete"
+  echo "==> Docker deploy complete"
   exit 0
 fi
 
 # -----------------------------
-# DEPLOY SINGLE SERVICE
+# SERVICES MODE (systemd services)
 # -----------------------------
-echo "==> Service deploy: $SERVICE"
+if [[ "$SERVICE" == "services" ]]; then
 
-if [[ ! -d "$LOCAL_DIR/$SERVICE" ]]; then
-  echo "ERROR: Service not found locally: $SERVICE"
-  exit 1
+  echo "==> Deploying all systemd services"
+
+  rsync -avz --delete \
+    "$LOCAL_SERVICES_DIR/" \
+    "$SERVER:$REMOTE_SERVICES_DIR/"
+
+  ssh "$SERVER" bash -s << 'EOF'
+set -euo pipefail
+
+sudo systemctl daemon-reload || true
+
+for dir in /opt/*/ ; do
+  service=$(basename "$dir")
+
+  if systemctl list-unit-files | grep -q "^${service}.service"; then
+    echo "-> restarting $service"
+    sudo systemctl restart "$service" || true
+  fi
+done
+EOF
+
+  echo "==> Services deploy complete"
+  exit 0
 fi
 
-rsync -avz --delete \
-  "$LOCAL_DIR/$SERVICE/" \
-  "$SERVER:$REMOTE_DIR/$SERVICE/"
+# -----------------------------
+# SINGLE TARGET AUTO-DETECTION
+# -----------------------------
+echo "==> Target deploy: $SERVICE"
 
-ssh "$SERVER" bash -s << EOF
+# ---- Docker service
+if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
+
+  echo "==> Docker service detected: $SERVICE"
+
+  rsync -avz --delete \
+    "$LOCAL_DOCKER_DIR/$SERVICE/" \
+    "$SERVER:$REMOTE_DOCKER_DIR/$SERVICE/"
+
+  ssh "$SERVER" bash -s << EOF
 set -euo pipefail
 
 cd /srv/docker/$SERVICE
-
-if [ ! -f "docker-compose.yml" ]; then
-  echo "ERROR: docker-compose.yml not found for $SERVICE"
-  exit 1
-fi
-
-echo "==> Rebuilding $SERVICE"
 docker compose up -d --remove-orphans
-
-docker ps --filter name=$SERVICE
 EOF
 
-echo "==> Deployment complete"
+  echo "==> Docker service deployed"
+  exit 0
+fi
+
+# ---- Systemd service
+if [[ -d "$LOCAL_SERVICES_DIR/$SERVICE" ]]; then
+
+  echo "==> Systemd service detected: $SERVICE"
+
+  rsync -avz --delete \
+    "$LOCAL_SERVICES_DIR/$SERVICE/" \
+    "$SERVER:$REMOTE_SERVICES_DIR/$SERVICE/"
+
+  ssh "$SERVER" bash -s << EOF
+set -euo pipefail
+
+sudo systemctl daemon-reload || true
+sudo systemctl restart "$SERVICE" || true
+sudo systemctl status "$SERVICE" --no-pager || true
+EOF
+
+  echo "==> Systemd service deployed"
+  exit 0
+fi
+
+echo "ERROR: Unknown service: $SERVICE"
+exit 1
