@@ -91,7 +91,10 @@ if [[ "$SERVICE" == "services" ]]; then
 
   echo "==> Deploying all systemd services"
 
-  rsync -avz --delete \
+  rsync -avz \
+    --exclude 'venv/' \
+    --exclude '__pycache__/' \
+    --exclude '*.pyc' \
     "$LOCAL_SERVICES_DIR/" \
     "$SERVER:$REMOTE_SERVICES_DIR/"
 
@@ -124,7 +127,10 @@ if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
 
   echo "==> Docker service detected: $SERVICE"
 
-  rsync -avz --delete \
+  rsync -avz \
+    --exclude 'venv/' \
+    --exclude '__pycache__/' \
+    --exclude '*.pyc' \
     "$LOCAL_DOCKER_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_DOCKER_DIR/$SERVICE/"
 
