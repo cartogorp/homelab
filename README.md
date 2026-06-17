@@ -1,125 +1,130 @@
 # Homelab (whalesea)
 
-This repository documents and manages the configuration for my home server **whalesea**.
+This repository manages the infrastructure for my home server whalesea.
 
-The server is a headless Ubuntu-based system accessed primarily via SSH, with optional remote access via Tailscale.
-
----
-
-## 🧠 Design Goals
-
-- Headless-first server (no reliance on a monitor/GUI)
-- Fully SSH-managed administration
-- Reproducible infrastructure using version-controlled configs
-- Clear separation between configuration (Git) and runtime data (/srv)
-- Easy recovery and rebuild from scratch
-- Support for media hosting, game streaming, and self-hosted services
+It includes:
+- Docker-based services
+- Systemd-managed Python services
+- Custom deployment automation
+- Shared storage under /srv
 
 ---
 
-## 🖥️ Server Overview
+## Architecture Overview
 
-- Hostname: whalesea
-- User: homelab
-- OS: Ubuntu Server
-- Primary access: SSH
-- Remote access: Tailscale mesh VPN
-- Local IP: 192.168.86.144 (DHCP reservation)
+The system has two runtime layers:
 
----
+### Docker Layer
 
-## 🔐 Access
+Location: /srv/docker
 
-SSH is used for all administration:
+Used for containerized applications.
 
-ssh whalesea
+Each service contains:
+- docker-compose.yml
+- optional config and data directories
 
-Authentication is key-based only. Password login is disabled or will be disabled once stable.
+Deployed via rsync and docker compose restart.
 
 ---
 
-## 🌐 Tailscale Access
+### Systemd Python Services Layer
 
-Tailscale is used for secure remote administration without exposing SSH to the internet.
+Location: /srv/services
 
-Command used on server:
+Used for long-running Python services.
 
-sudo tailscale up
-
----
-
-## 📁 Filesystem Layout
-
-### Runtime data (server-side)
-
-/srv/
-├── docker/     Docker Compose stacks
-├── media/      Jellyfin media library
-├── downloads/  Temporary downloads
-└── appdata/    Service data (databases, configs)
+Each service contains:
+- main Python script (example: transcribe.py)
+- requirements.txt
+- venv directory
+- systemd service file
 
 ---
 
-### Git-managed configuration (this repo)
+## Deployment System
 
-~/homelab/
-├── docker/     Compose files per service
-├── scripts/    Utility scripts
-└── README.md
+Deployment command:
 
----
+./scripts/deploy.sh <service|docker|services|all>
 
-## 🐳 Docker Strategy
-
-- Each service lives in its own directory
-- Persistent data is always mounted from /srv
-- Docker Compose used for service definitions
-- Containers are treated as ephemeral (rebuildable)
-
-Example:
-
-/srv/docker/jellyfin/
-├── compose.yml
-└── config/
+Features:
+- Git state validation
+- rsync-based synchronization
+- automatic service detection
+- automatic venv creation for Python services
+- automatic dependency installation from requirements.txt
+- systemd restart after deployment
 
 ---
 
-## 🎬 Planned Services
+## Whisper Service
 
-### Media Server
-- Jellyfin for media streaming
+The Whisper service:
 
-### Game Streaming (future)
-- Steam Big Picture Mode
-- Sunshine for Moonlight streaming
-
-### Infrastructure (future)
-- Reverse proxy (Caddy or Traefik)
-- Monitoring / dashboards
+- Watches /srv/storage/whisper/uploads
+- Transcribes audio using faster-whisper
+- Outputs text files to /srv/storage/whisper/transcripts
+- Runs continuously using systemd and watchdog
 
 ---
 
-## 🔄 Backup Strategy (planned)
+## Filesystem Layout
 
-- Configuration: stored in Git (~/homelab)
-- Data: external backup target (TBD)
-- Media: partially rebuildable depending on importance
-
----
-
-## ⚠️ Security Notes
-
-- SSH access is key-based only
-- Password authentication should be disabled once stable
-- Tailscale is used for secure remote access
-- No public SSH exposure to the internet
+/srv/docker → Docker services
+/srv/services → Systemd Python services
+/srv/storage → Shared application data
 
 ---
 
-## 🚧 Status
+## Whisper Storage
 
-Current stage:
-Foundation setup complete (SSH + networking + remote access)
+/srv/storage/whisper/uploads → incoming audio files
+/srv/storage/whisper/transcripts → output text files
+/srv/storage/whisper/processed → optional archive folder
 
-Next step:
-Docker installation and first service deployment (Jellyfin)
+---
+
+## Server Overview
+
+Hostname: whalesea  
+User: homelab  
+OS: Ubuntu Server  
+Access: SSH key-based only  
+Remote access: Tailscale VPN  
+
+---
+
+## Security Model
+
+- No password SSH login
+- SSH key authentication only
+- Services run locally unless explicitly exposed
+- Tailscale used for remote access
+
+---
+
+## Design Principles
+
+- Infrastructure defined in Git
+- Runtime lives in /srv
+- Docker = packaged services
+- Systemd = custom long-running services
+- Deploy script is the single source of truth for updates
+
+---
+
+## Current Status
+
+Working:
+- Docker orchestration
+- Systemd service framework
+- Whisper transcription pipeline
+- Deployment automation
+- Storage structure under /srv
+
+Next:
+- logging improvements
+- reverse proxy (Caddy/Traefik)
+- backups
+- service standardization
