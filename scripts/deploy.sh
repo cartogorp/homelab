@@ -157,8 +157,31 @@ if [[ -d "$LOCAL_SERVICES_DIR/$SERVICE" ]]; then
   ssh "$SERVER" bash -s << EOF
 set -euo pipefail
 
+cd /srv/services/$SERVICE
+
+# -----------------------------
+# Ensure venv exists
+# -----------------------------
+if [ ! -d "venv" ]; then
+  echo "==> Creating venv"
+  python3 -m venv venv
+fi
+
+# -----------------------------
+# Install dependencies (source of truth)
+# -----------------------------
+if [ -f "requirements.txt" ]; then
+  echo "==> Installing dependencies"
+  
+  ./venv/bin/python -m ensurepip --upgrade || true
+  ./venv/bin/python -m pip install --upgrade pip
+  ./venv/bin/python -m pip install -r requirements.txt
+else
+  echo "WARNING: No requirements.txt found for $SERVICE"
+fi
+
 sudo systemctl daemon-reload || true
-sudo systemctl restart "$SERVICE" || true
+sudo systemctl restart "$SERVICE"
 sudo systemctl status "$SERVICE" --no-pager || true
 EOF
 
