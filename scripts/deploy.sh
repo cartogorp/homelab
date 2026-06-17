@@ -7,7 +7,7 @@ LOCAL_DOCKER_DIR="./docker"
 REMOTE_DOCKER_DIR="/srv/docker"
 
 LOCAL_SERVICES_DIR="./services"
-REMOTE_SERVICES_DIR="/opt"
+REMOTE_SERVICES_DIR="/srv/services"
 
 SERVICE="${1:-all}"
 
@@ -100,10 +100,10 @@ set -euo pipefail
 
 sudo systemctl daemon-reload || true
 
-for dir in /opt/*/ ; do
+for dir in /srv/services/*/ ; do
   service=$(basename "$dir")
 
-  if systemctl list-unit-files | grep -q "^${service}.service"; then
+  if systemctl is-enabled --quiet "$service"; then
     echo "-> restarting $service"
     sudo systemctl restart "$service" || true
   fi

@@ -1,11 +1,17 @@
 import time
 import os
+import shutil
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from faster_whisper import WhisperModel
 
 UPLOAD_DIR = "/srv/storage/whisper/uploads"
 OUTPUT_DIR = "/srv/storage/whisper/transcripts"
+PROCESSED_DIR = "/srv/storage/whisper/processed"
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 model = WhisperModel("base.en", device="cpu")
 
@@ -68,12 +74,19 @@ class Handler(FileSystemEventHandler):
 
         text = "\n".join(lines)
 
-        out_path = os.path.join(OUTPUT_DIR, filename + ".txt")
+        base_name = os.path.splitext(filename)[0]
+        out_path = os.path.join(OUTPUT_DIR, base_name + ".txt")
 
         with open(out_path, "w") as f:
             f.write(text)
 
         print(f"Saved: {out_path}")
+
+        processed_path = os.path.join(PROCESSED_DIR, filename)
+
+        shutil.move(filepath, processed_path)
+
+        print(f"Moved: {processed_path}")
 
 
 observer = Observer()
