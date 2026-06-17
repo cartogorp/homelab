@@ -62,7 +62,7 @@ if [[ "$SERVICE" == "docker" ]]; then
 
   echo "==> Deploying all docker services"
 
-  rsync -avz --delete \
+  rsync -avz \
     --exclude='.git' \
     "$LOCAL_DOCKER_DIR/" \
     "$SERVER:$REMOTE_DOCKER_DIR/"
@@ -150,7 +150,7 @@ if [[ -d "$LOCAL_SERVICES_DIR/$SERVICE" ]]; then
 
   echo "==> Systemd service detected: $SERVICE"
 
-  rsync -avz --delete \
+  rsync -avz \
     "$LOCAL_SERVICES_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_SERVICES_DIR/$SERVICE/"
 
