@@ -9,6 +9,7 @@ services:
     volumes:
       - /srv/appdata/sonarr:/config
       - /srv/media:/srv/media
+      - /srv/media/downloads:/downloads
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -24,6 +25,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/radarr:/config
+      - /srv/media:/srv/media
       - /srv/media:/srv/media
     ports:
       - "7878:7878"
