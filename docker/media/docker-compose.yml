@@ -26,7 +26,7 @@ services:
     volumes:
       - /srv/appdata/radarr:/config
       - /srv/media:/srv/media
-      - /srv/media:/srv/media
+      - /srv/media/downloads:/downloads
     ports:
       - "7878:7878"
     restart: unless-stopped
