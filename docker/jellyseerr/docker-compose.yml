@@ -17,6 +17,6 @@ services:
     networks:
       - media-net
 
-    networks:
-      media-net:
-        external: true
+networks:
+  media-net:
+    external: true
