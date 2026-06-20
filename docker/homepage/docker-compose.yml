@@ -13,3 +13,9 @@ services:
       - TZ=America/Toronto
       - HOMEPAGE_ALLOWED_HOSTS=whalesea:3000,whalesea,homelab,localhost:3000,localhost,127.0.0.1:3000, 127.0.0.1
     restart: unless-stopped
+    networks:
+      - media-net
+
+networks:
+  media-net:
+    external: true
