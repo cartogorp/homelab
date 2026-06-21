@@ -4,8 +4,7 @@
 title: whalesea
 headerStyle: boxed
 statusStyle: "dot"
-
-
+---
 - Media:
     - Jellyfin:
         href: http://whalesea:8096
