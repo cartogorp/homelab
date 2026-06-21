@@ -54,6 +54,15 @@
           url: http://192.168.86.144:8080
           username: admin
           password: sL7pe4fp!
+    - SABnzbd:
+        href: http://192.168.x.x:8085
+        description: Usenet downloader
+        server: my-docker
+        container: sabnzbd
+        widget:
+          type: sabnzbd
+          url: http://192.168.86.144:8085
+          key: 79990e4cfa904279afcf5f04f8e95b1c
 
 - Network:
     - Gluetun:
