@@ -50,7 +50,7 @@
 - Downloads:
     - qBittorrent:
         href: http://whalesea:8080
-        icon: Qbittorrent
+        icon: qbittorrent
         server: my-docker
         description: Torrent client (VPN-only)
         container: gluetun 
@@ -61,7 +61,7 @@
           password: sL7pe4fp!
     - SABnzbd:
         href: http://192.168.x.x:8085
-        icon: Sabnzbd
+        icon: sabnzbd
         description: Usenet downloader
         server: my-docker
         container: sabnzbd
@@ -71,12 +71,8 @@
           key: 79990e4cfa904279afcf5f04f8e95b1c
 
 - Network:
-    - Gluetun:
-        href: http://192.168.86.144:8000
-        server: my-docker
-        description: VPN container dashboard (if enabled)
-        container: gluetun
     - VPN Status:
+        icon: uptime-kuma
         widget:
           type: uptimekuma 
           url: http://192.168.86.144:3001
