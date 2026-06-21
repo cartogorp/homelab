@@ -85,7 +85,7 @@
         widget:
           type: uptimekuma
           url: http://192.168.86.144:3001
-          slug:vpn
+          slug: vpn
 
 - Infrastructure:
     - Homepage:
