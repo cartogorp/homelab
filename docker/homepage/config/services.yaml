@@ -66,15 +66,10 @@
 
 - Network:
     - Gluetun:
-        href: http://whalesea:8000
+        href: http://192.168.86.144:8000
         server: my-docker
         description: VPN container dashboard (if enabled)
         container: gluetun
-        widget:
-          type:
-          url:
-          key:
-
 
 - Infrastructure:
     - Homepage:
