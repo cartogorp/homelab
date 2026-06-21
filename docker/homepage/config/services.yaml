@@ -73,7 +73,7 @@
     - Uptime-Kuma:
         widget:
           type: uptimekuma 
-          url: http://whalesea.me:3001
+          url: http://whalesea:3001
           slug: vpn
 
 - Infrastructure:
