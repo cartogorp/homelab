@@ -18,6 +18,7 @@ services:
       - 8080:8080
       - 6881:6881
       - 6881:6881/udp
+      - 8000:8000
     restart: unless-stopped
 
   qbittorrent:
