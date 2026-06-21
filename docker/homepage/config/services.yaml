@@ -48,11 +48,12 @@
         href: http://whalesea:8080
         server: my-docker
         description: Torrent client (VPN-only)
-        container: qbittorrent
+        container: gluetun 
         widget:
-          type:
-          url:
-          key:
+          type: qbittorrent 
+          url: http://whalesea:8080
+          username: admin
+          password: sL7pe4fp!
 
 - Network:
     - Gluetun:
