@@ -80,11 +80,12 @@
         widget:
           type: uptimekuma
           url: http://192.168.86.144:3001
-          slug: vpn
+    - VPN Status:
+        icon: nordvpn
         widget:
           type: uptimekuma
           url: http://192.168.86.144:3001
-          icon: nordvpn
+          slug:vpn
 
 - Infrastructure:
     - Homepage:
