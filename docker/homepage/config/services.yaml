@@ -77,12 +77,14 @@
         description: uptimekuma
         server: my-docker
         container: uptime-kuma
-    - VPN Status:
-        icon: nordvpn
         widget:
-          type: uptime-kuma
+          type: uptimekuma
           url: http://192.168.86.144:3001
           slug: vpn
+        widget:
+          type: uptimekuma
+          url: http://192.168.86.144:3001
+          icon: nordvpn
 
 - Infrastructure:
     - Homepage:
