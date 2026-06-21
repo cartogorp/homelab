@@ -51,7 +51,7 @@
         container: gluetun 
         widget:
           type: qbittorrent 
-          url: http://whalesea:8080
+          url: http://192.168.86.144:8080
           username: admin
           password: sL7pe4fp!
 
