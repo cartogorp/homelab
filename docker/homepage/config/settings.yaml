@@ -2,6 +2,10 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/settings/
 
+title: whalesea
+headerStyle: boxed
+statusStyle: "dot"
+
 providers:
   openweathermap: openweathermapapikey
   weatherapi: weatherapiapikey
