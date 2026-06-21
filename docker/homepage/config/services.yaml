@@ -70,7 +70,7 @@
         server: my-docker
         description: VPN container dashboard (if enabled)
         container: gluetun
-    - Uptime-Kuma:
+    - VPN Status:
         widget:
           type: uptimekuma 
           url: http://192.168.86.144:3001
