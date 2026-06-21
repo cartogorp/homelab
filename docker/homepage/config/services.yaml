@@ -5,16 +5,18 @@
 - Media:
     - Jellyfin:
         href: http://whalesea:8096
+        icon: jellyfin
         server: my-docker
         description: Media server
         container: jellyfin
         widget: 
-          type:
-          url:
-          key:
+          type: jellyfin 
+          url: https://watch.whalesea.me
+          key: 50f0c4093c58457ba16fd010193b57e5
 
     - Sonarr:
         href: http://whalesea:8989
+        icon: sonarr
         server: my-docker
         description: TV automation
         container: sonarr
@@ -25,6 +27,7 @@
 
     - Radarr:
         href: http://whalesea:7878
+        icon: radarr
         server: my-docker
         description: Movie automation
         container: radarr
@@ -35,6 +38,7 @@
 
     - Prowlarr:
         href: http://whalesea:9696
+        icon: prowlarr
         server: my-docker
         description: Indexer manager
         container: prowlarr
@@ -46,6 +50,7 @@
 - Downloads:
     - qBittorrent:
         href: http://whalesea:8080
+        icon: Qbittorrent
         server: my-docker
         description: Torrent client (VPN-only)
         container: gluetun 
@@ -56,6 +61,7 @@
           password: sL7pe4fp!
     - SABnzbd:
         href: http://192.168.x.x:8085
+        icon: Sabnzbd
         description: Usenet downloader
         server: my-docker
         container: sabnzbd
