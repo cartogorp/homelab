@@ -8,12 +8,20 @@
         server: my-docker
         description: Media server
         container: jellyfin
+        widget: 
+          type:
+          url:
+          key:
 
     - Sonarr:
         href: http://whalesea:8989
         server: my-docker
         description: TV automation
         container: sonarr
+        widget: 
+          type: sonarr 
+          url: http://sonarr:8989
+          key: 29e0ad18c78f4126a4f0055ee71d55df
 
     - Radarr:
         href: http://whalesea:7878
@@ -22,7 +30,7 @@
         container: radarr
         widget:
           type: radarr
-          url: http://192.168.86.144:7878
+          url: http://radarr:7878
           key: 6486f3c902884e8e9ba33c4a13e5eec0
 
     - Prowlarr:
@@ -30,6 +38,10 @@
         server: my-docker
         description: Indexer manager
         container: prowlarr
+        widget:
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: adbf53f2ffe84cfca2facab03f0f5f28
 
 - Downloads:
     - qBittorrent:
@@ -37,6 +49,10 @@
         server: my-docker
         description: Torrent client (VPN-only)
         container: qbittorrent
+        widget:
+          type:
+          url:
+          key:
 
 - Network:
     - Gluetun:
@@ -44,6 +60,11 @@
         server: my-docker
         description: VPN container dashboard (if enabled)
         container: gluetun
+        widget:
+          type:
+          url:
+          key:
+
 
 - Infrastructure:
     - Homepage:
