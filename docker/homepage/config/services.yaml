@@ -71,17 +71,18 @@
           key: 79990e4cfa904279afcf5f04f8e95b1c
 
 - Network:
-    - Uptime Kuma:
+    - Uptime-Kuma:
         href: http://192.168.86.144:3001
         icon: uptime-kuma
-        description: uptimekuma
+        description: Server monitoring
         server: my-docker
         container: uptime-kuma
         widget:
           type: uptimekuma
           url: http://192.168.86.144:3001
-    - VPN Status:
-        icon: nordvpn
+          slug: whalesea
+    - Gluetun VPN:
+        icon: gluetun
         widget:
           type: uptimekuma
           url: http://192.168.86.144:3001
