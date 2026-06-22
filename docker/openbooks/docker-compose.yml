@@ -1,0 +1,11 @@
+services:
+  openbooks:
+    image: evanbuss/openbooks:latest
+    container_name: openbooks
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - /srv/media/books/staging:/books
+    environment:
+      - TZ=America/Toronto
