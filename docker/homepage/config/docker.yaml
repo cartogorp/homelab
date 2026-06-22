@@ -7,4 +7,4 @@
 #   port: 2375
 
 my-docker:
-  host: unix:///var/run/docker.sock
+  socket: /var/run/docker.sock
