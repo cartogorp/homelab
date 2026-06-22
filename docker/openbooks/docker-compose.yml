@@ -12,6 +12,7 @@ services:
       - --dir
       - /books
       - --persist
+      - --no-browser-downloads
     volumes:
       - /srv/media/books/staging:/books
     environment:
