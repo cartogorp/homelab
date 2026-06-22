@@ -4,8 +4,10 @@ services:
     container_name: openbooks
     restart: unless-stopped
     ports:
-      - "8083:80"
+      - "8083:8080"
+    command: ["server"]
     volumes:
       - /srv/media/books/staging:/books
+      - /srv/docker/openbooks/config:/config
     environment:
       - TZ=America/Toronto
