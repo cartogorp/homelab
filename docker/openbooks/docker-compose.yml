@@ -4,10 +4,13 @@ services:
     container_name: openbooks
     restart: unless-stopped
     ports:
-      - "8083:8080"
-    command: ["server"]
+      - "8083:5228"
+    command:
+      - server
+      - --name 
+      - whalesea
     volumes:
-      - /srv/media/books/staging:/books
+      - /srv/media/books/staging:/tmp/books
       - /srv/docker/openbooks/config:/config
     environment:
       - TZ=America/Toronto
