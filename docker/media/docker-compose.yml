@@ -64,23 +64,6 @@ services:
     restart: unless-stopped
     networks:
       - media-net
-  
-  readarr:
-    image: ghcr.io/hotio/readarr:latest
-    container_name: readarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Toronto
-    volumes:
-      - /srv/docker/readarr/config:/config
-      - /srv/media/books:/books
-      - /srv/media/downloads:/downloads
-    ports:
-      - 8787:8787
-    restart: unless-stopped
-    networks:
-      - media-net
       
 networks:
   media-net:
