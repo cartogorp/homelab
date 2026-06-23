@@ -69,6 +69,12 @@
           type: sabnzbd
           url: http://192.168.86.144:8085
           key: 79990e4cfa904279afcf5f04f8e95b1c
+    - Openbooks:
+        href: http://whalesea:8083
+        icon: openbooks
+        description: IRC book downloads 
+        server: my-docker
+        container: openbooks
 
 - Network:
     - Uptime-Kuma:
