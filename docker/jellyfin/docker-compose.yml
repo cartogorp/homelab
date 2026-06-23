@@ -17,3 +17,9 @@ services:
     group_add:
       - "993"
       - "44"
+    networks:
+      - media-net
+
+networks:
+  media-net:
+    external: true
