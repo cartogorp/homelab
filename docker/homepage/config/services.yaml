@@ -55,7 +55,7 @@
         container: jellyseerr
         widget:
           type: seerr
-          url: http://seerr.whalesea
+          url: http://jellyseerr:5055
           key: MTc4MTExMzczMjg3NDk3M2U5MDAwLWJjNmUtNGE2OS05ODc1LWM3NGM1MDViYTY1Mw==
 
 - Downloads:
