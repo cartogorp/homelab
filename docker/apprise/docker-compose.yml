@@ -1,0 +1,8 @@
+apprise:
+  image: caronc/apprise:latest
+  container_name: apprise
+  restart: unless-stopped
+  ports:
+    - "8000:8000"
+  networks:
+    - media-net
