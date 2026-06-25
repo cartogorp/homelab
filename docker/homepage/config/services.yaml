@@ -47,6 +47,17 @@
           url: http://prowlarr:9696
           key: adbf53f2ffe84cfca2facab03f0f5f28
 
+    - Jellyseerr:
+        href: http://whalesea:5055 
+        icon: jellyseerr 
+        server: my-docker 
+        description: Media request UI 
+        container: jellyseerr
+        widget:
+          type: seerr
+          url: http://seerr.whalesea
+          key: MTc4MTExMzczMjg3NDk3M2U5MDAwLWJjNmUtNGE2OS05ODc1LWM3NGM1MDViYTY1Mw==
+
 - Downloads:
     - qBittorrent:
         href: http://whalesea:8080
