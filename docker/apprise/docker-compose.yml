@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     networks:
       - media-net
+    volumes:
+      - /srv/appdata/apprise/apprise.yml:/config/apprise.yml
 
 networks:
   media-net:
