@@ -8,8 +8,8 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/calibre-web:/config
-      - /srv/media/books/calibre:/books
-      - /srv/media/books/staging/import-ready:/books/import
+      - /srv/media/books/calibre:/library
+      - /srv/media/books/staging/import-ready:/imports
     ports:
       - 8084:8083
     restart: unless-stopped
