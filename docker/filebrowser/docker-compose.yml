@@ -13,5 +13,6 @@ services:
       - /srv/storage:/srv
       - /srv/appdata/filebrowser/database:/database
       - /srv/appdata/filebrowser/config:/config
+      - /srv/media/books/staging/manual-import:/books/import
 
     restart: unless-stopped
