@@ -1,15 +1,15 @@
 services:
-  calibre-web:
-    image: lscr.io/linuxserver/calibre-web:latest
-    container_name: calibre-web
+  calibre-web-automated:
+    image: crocodilestick/calibre-web-automated:latest
+    container_name: calibre-web-automated
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/calibre-web:/config
-      - /srv/media/books/calibre:/library
-      - /srv/media/books/staging/import-ready:/imports
+      - /srv/media/books/calibre:/calibre-library
+      - /srv/media/books/staging/import-ready:/cwa-book-ingest
     ports:
       - 8084:8083
     restart: unless-stopped
