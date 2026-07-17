@@ -122,9 +122,12 @@ Working:
 - Whisper transcription pipeline
 - Deployment automation
 - Storage structure under /srv
+- Reverse proxy (Caddy)
 
 Next:
 - logging improvements
-- reverse proxy (Caddy/Traefik)
 - backups
 - service standardization
+- Shelfmark for CWA
+- Kavita + send to kindle setup
+- CWA KoSync
