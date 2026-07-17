@@ -14,5 +14,6 @@ services:
       - /srv/appdata/filebrowser/database:/database
       - /srv/appdata/filebrowser/config:/config
       - /srv/media/books/staging/manual-import:/srv/books/manual-import
+      - /srv/media/downloads/watch:/srv/torrent-watch
 
     restart: unless-stopped
