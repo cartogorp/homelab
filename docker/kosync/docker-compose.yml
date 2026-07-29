@@ -1,0 +1,12 @@
+services:
+  kosync:
+    image: ghcr.io/jberlyn/kosync-dotnet:latest
+    container_name: kosync
+    environment:
+      - TZ=America/Toronto
+      - ADMIN_PASSWORD=HIKCiTbqtaG2$pNQ9JCp
+    volumes:
+      - /srv/appdata/kosync:/app/data
+    ports:
+      - "127.0.0.1:17200:17200"
+    restart: unless-stopped
