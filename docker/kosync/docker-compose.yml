@@ -8,5 +8,5 @@ services:
     volumes:
       - /srv/appdata/kosync:/app/data
     ports:
-      - "127.0.0.1:17200:17200"
+      - "127.0.0.1:17200:8080"
     restart: unless-stopped
