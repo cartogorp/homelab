@@ -4,7 +4,7 @@ services:
     container_name: kosync
     environment:
       - TZ=America/Toronto
-      - ADMIN_PASSWORD=HIKCiTbqtaG2$pNQ9JCp
+      - ADMIN_PASSWORD=HIKCiTbqtaG2$$pNQ9JCp
     volumes:
       - /srv/appdata/kosync:/app/data
     ports:
