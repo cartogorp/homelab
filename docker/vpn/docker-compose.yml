@@ -43,8 +43,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - /srv/appdata/qbittorrent:/config
-      - /srv/media/downloads:/downloads
-      - /srv/media:/srv/media
+      - /srv/media:/media
     restart: unless-stopped
 
   prowlarr:
@@ -69,7 +68,6 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
-
     environment:
       - LOG_LEVEL=info
       - TZ=America/Toronto

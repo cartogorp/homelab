@@ -8,8 +8,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/sonarr:/config
-      - /srv/media:/srv/media
-      - /srv/media/downloads:/downloads
+      - /srv/media:/media
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -25,8 +24,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /srv/appdata/radarr:/config
-      - /srv/media:/srv/media
-      - /srv/media/downloads:/downloads
+      - /srv/media:/media
     ports:
       - "7878:7878"
     restart: unless-stopped
@@ -43,7 +41,7 @@ services:
       - SABNZBD__HOST_WHITELIST=0.0.0.0/0
     volumes:
       - /srv/appdata/sabnzbd:/config
-      - /srv/media/downloads:/downloads
+      - /srv/media:/media
     ports:
       - "8085:8080"
     restart: unless-stopped
