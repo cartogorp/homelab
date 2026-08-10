@@ -134,10 +134,11 @@ if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
     "$LOCAL_DOCKER_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_DOCKER_DIR/$SERVICE/"
 
-  ssh "$SERVER" bash -s << EOF
+  ssh "$SERVER" bash -s -- "$SERVICE" << EOF
 set -euo pipefail
 
 cd /srv/docker/$SERVICE
+docker compose pull
 docker compose up -d --remove-orphans
 EOF
 
