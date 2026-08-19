@@ -1,2 +1,2 @@
 
-docker/vpn/.env
+docker/*/.env
