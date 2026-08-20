@@ -9,6 +9,9 @@ services:
 
     environment:
       SECRET_ENCRYPTION_KEY: ${SECRET_ENCRYPTION_KEY}
+    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     ports:
       - "127.0.0.1:7575:7575"
