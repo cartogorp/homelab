@@ -98,17 +98,28 @@ if [[ "$SERVICE" == "services" ]]; then
     "$LOCAL_SERVICES_DIR/" \
     "$SERVER:$REMOTE_SERVICES_DIR/"
 
-  ssh "$SERVER" bash -s << 'EOF'
+ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
 
-sudo systemctl daemon-reload || true
+for dir in /srv/services/*/ ; do
+  service=$(basename "$dir")
+  unit="/srv/services/$service/$service.service"
+
+  if [ -f "$unit" ]; then
+    echo "-> installing $service.service"
+    sudo install -m 644 "$unit" "/etc/systemd/system/$service.service"
+  fi
+done
+
+sudo systemctl daemon-reload
 
 for dir in /srv/services/*/ ; do
   service=$(basename "$dir")
 
   if systemctl is-enabled --quiet "$service"; then
     echo "-> restarting $service"
-    sudo systemctl restart "$service" || true
+    sudo systemctl restart "$service"
+    sudo systemctl is-active --quiet "$service"
   fi
 done
 EOF
@@ -137,6 +148,8 @@ if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
   ssh "$SERVER" bash -s -- "$SERVICE" << EOF
 set -euo pipefail
 
+SERVICE="$1"
+
 cd /srv/docker/$SERVICE
 docker compose pull
 docker compose up -d --remove-orphans
@@ -152,13 +165,18 @@ if [[ -d "$LOCAL_SERVICES_DIR/$SERVICE" ]]; then
   echo "==> Systemd service detected: $SERVICE"
 
   rsync -avz \
+    --exclude 'venv/' \
+    --exclude '__pycache__/' \
+    --exclude '*.pyc' \
     "$LOCAL_SERVICES_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_SERVICES_DIR/$SERVICE/"
 
-  ssh "$SERVER" bash -s << EOF
+  ssh "$SERVER" bash -s -- "$SERVICE" << 'EOF'
 set -euo pipefail
 
-cd /srv/services/$SERVICE
+SERVICE="$1"
+
+cd "/srv/services/$SERVICE"
 
 # -----------------------------
 # Ensure venv exists
@@ -169,11 +187,11 @@ if [ ! -d "venv" ]; then
 fi
 
 # -----------------------------
-# Install dependencies (source of truth)
+# Install dependencies
 # -----------------------------
 if [ -f "requirements.txt" ]; then
   echo "==> Installing dependencies"
-  
+
   ./venv/bin/python -m ensurepip --upgrade || true
   ./venv/bin/python -m pip install --upgrade pip
   ./venv/bin/python -m pip install -r requirements.txt
@@ -181,9 +199,23 @@ else
   echo "WARNING: No requirements.txt found for $SERVICE"
 fi
 
-sudo systemctl daemon-reload || true
+# -----------------------------
+# Install systemd unit
+# -----------------------------
+if [ -f "$SERVICE.service" ]; then
+  echo "==> Installing systemd unit"
+  sudo install -m 644 "$SERVICE.service" "/etc/systemd/system/$SERVICE.service"
+fi
+
+sudo systemctl daemon-reload
+
+echo "==> Restarting $SERVICE"
 sudo systemctl restart "$SERVICE"
-sudo systemctl status "$SERVICE" --no-pager || true
+
+echo "==> Checking $SERVICE status"
+sudo systemctl is-active --quiet "$SERVICE"
+sudo systemctl status "$SERVICE" --no-pager
+
 EOF
 
   echo "==> Systemd service deployed"

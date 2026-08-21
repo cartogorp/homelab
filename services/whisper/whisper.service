@@ -1,0 +1,20 @@
+[Unit]
+Description=Whisper Transcription Service
+After=network.target
+
+[Service]
+Type=simple
+User=homelab
+WorkingDirectory=/srv/services/whisper
+
+ExecStart=/srv/services/whisper/venv/bin/python -u /srv/services/whisper/transcribe.py
+
+Restart=always
+RestartSec=3
+
+Environment=PYTHONUNBUFFERED=1
+
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
