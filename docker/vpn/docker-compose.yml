@@ -15,6 +15,7 @@ services:
       - TZ=America/Toronto
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=192.168.86.0/24
+      - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}'
     ports:
       - 8080:8080
       - 6881:6881
