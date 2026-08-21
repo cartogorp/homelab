@@ -39,6 +39,7 @@ services:
       - PGID=1000
       - TZ=America/Toronto
       - SABNZBD__HOST_WHITELIST=0.0.0.0/0
+      - SABNZBD__LOCAL_RANGES=192.168.86.0/24,100.64.0.0/10
     volumes:
       - /srv/appdata/sabnzbd:/config
       - /srv/media:/media
