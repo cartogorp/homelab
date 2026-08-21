@@ -204,7 +204,9 @@ fi
 # -----------------------------
 if [ -f "$SERVICE.service" ]; then
   echo "==> Installing systemd unit"
-  sudo install -m 644 "$SERVICE.service" "/etc/systemd/system/$SERVICE.service"
+sudo /usr/local/sbin/install-systemd-unit \
+  "/srv/services/$SERVICE/$SERVICE.service" \
+  "$SERVICE.service"
 fi
 
 sudo systemctl daemon-reload
