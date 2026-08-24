@@ -31,6 +31,22 @@ services:
     networks:
       - media-net
 
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - /srv/appdata/bazarr:/config
+      - /srv/media:/media
+    ports:
+      - "6767:6767"
+    restart: unless-stopped
+    networks:
+      - media-net
+
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
