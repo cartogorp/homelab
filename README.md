@@ -131,3 +131,22 @@ Next:
 - Shelfmark for CWA
 - Kavita + send to kindle setup
 - CWA KoSync
+
+### TODO: Improve service deployment detection
+
+`deploy.sh` currently assumes every directory under `services/` is a Python/systemd service.
+
+This works for services such as `whisper`, but `services/books/` contains standalone utility scripts and has:
+- no `requirements.txt`
+- no `books.service` systemd unit
+
+As a result, `./scripts/deploy.sh books` successfully rsyncs the files, but then:
+1. attempts to create a Python venv
+2. warns that `requirements.txt` is missing
+3. attempts to restart nonexistent `books.service`
+4. exits with an error despite the files having deployed successfully
+
+TODO: Update deployment logic to:
+- only create/update a venv when `requirements.txt` exists
+- only restart a systemd service when a corresponding unit actually exists
+- support script-only service directories such as `books`
