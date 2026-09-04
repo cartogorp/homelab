@@ -69,6 +69,19 @@ while IFS= read -r -d '' FILE; do
     TITLE="$(echo "$TITLE" | sed 's/[[:space:]]*$//' | sed 's/^[[:space:]]*//')"
     AUTHOR="$(echo "$AUTHOR" | sed 's/[[:space:]]*$//' | sed 's/^[[:space:]]*//')"
 
+    # Remove duplicated author from title when metadata includes it
+    # Example:
+    #   Title : Follett, Ken - The Pillars of the Earth
+    #   Author: Follett, Ken
+    # becomes:
+    #   Title : The Pillars of the Earth
+
+    if [[ "$TITLE" == "$AUTHOR - "* ]]; then
+	TITLE="${TITLE#"$AUTHOR - "}"
+    elif [[ "$TITLE" == *" - $AUTHOR" ]]; then
+	TITLE="${TITLE%" - $AUTHOR"}"
+    fi
+
     NEW_NAME="${TITLE} - ${AUTHOR}.epub"
 
     echo "Metadata:"
