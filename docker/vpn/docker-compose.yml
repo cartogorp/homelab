@@ -7,15 +7,16 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=nordvpn
-      - VPN_TYPE=openvpn
-      - OPENVPN_USER=${NORD_USER}
-      - OPENVPN_PASSWORD=${NORD_PASS}
-      - SERVER_REGIONS=Canada
-      - TZ=America/Toronto
-      - FIREWALL=on
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.86.0/24
-      - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}'
+    - VPN_SERVICE_PROVIDER=protonvpn
+    - VPN_TYPE=wireguard
+    - WIREGUARD_PRIVATE_KEY=${PROTON_WG_PRIVATE_KEY}
+    - SERVER_COUNTRIES=Canada
+    - PORT_FORWARD_ONLY=on
+    - VPN_PORT_FORWARDING=on
+    - TZ=America/Toronto
+    - FIREWALL=on
+    - FIREWALL_OUTBOUND_SUBNETS=192.168.86.0/24
+    - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}'
     ports:
       - 8080:8080
       - 6881:6881
