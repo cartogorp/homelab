@@ -13,7 +13,7 @@ services:
       - freshrss_extensions:/var/www/FreshRSS/extensions
 
     ports:
-      - "127.0.0.1:8085:80"
+      - "127.0.0.1:8086:80"
 
     healthcheck:
       test: ["CMD", "cli/health.php"]
