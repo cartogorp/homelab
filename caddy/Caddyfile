@@ -1,0 +1,38 @@
+{
+	email duplisea.danielle@gmail.com
+}
+watch.whalesea.me {
+	reverse_proxy localhost:8096
+}
+
+files.whalesea.me {
+	reverse_proxy localhost:8081
+}
+
+request.whalesea.me {
+	reverse_proxy localhost:5055
+}
+
+books.whalesea.me {
+	handle /opds {
+		rewrite * /api/opds/{$KAVITA_OPDS_KEY}
+		reverse_proxy localhost:5000
+	}
+
+	reverse_proxy localhost:5000
+}
+
+kosync.whalesea.me {
+	reverse_proxy localhost:17200
+}
+
+home.whalesea.me {
+	reverse_proxy localhost:7575
+}
+
+rss.whalesea.me {
+	@not_tailnet not remote_ip 100.64.0.0/10
+	respond @not_tailnet "Forbidden" 403
+
+	reverse_proxy 127.0.0.1:8086
+}

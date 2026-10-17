@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# -----------------------------
+# Paths and configuration
+# -----------------------------
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$REPO_DIR"
+
 SERVER="homelab@whalesea"
 
 LOCAL_DOCKER_DIR="./docker"
@@ -8,6 +15,9 @@ REMOTE_DOCKER_DIR="/srv/docker"
 
 LOCAL_SERVICES_DIR="./services"
 REMOTE_SERVICES_DIR="/srv/services"
+
+LOCAL_CADDY_DIR="./caddy"
+REMOTE_CADDY_DIR="/srv/caddy"
 
 SERVICE="${1:-all}"
 
@@ -31,8 +41,8 @@ fi
 
 git fetch origin >/dev/null
 
-LOCAL=$(git rev-parse @)
-REMOTE=$(git rev-parse @{u})
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse '@{u}')
 
 if [[ "$LOCAL" != "$REMOTE" ]]; then
   echo "ERROR: Local branch is not in sync with origin"
@@ -42,24 +52,83 @@ fi
 echo "==> Git state OK"
 
 # -----------------------------
+# CADDY MODE
+# -----------------------------
+if [[ "$SERVICE" == "caddy" ]]; then
+  echo "==> Deploying Caddy"
+
+  test -f "$LOCAL_CADDY_DIR/Caddyfile" || {
+    echo "ERROR: Local Caddyfile not found"
+    exit 1
+  }
+
+  ssh "$SERVER" "mkdir -p '$REMOTE_CADDY_DIR'"
+
+  rsync -avz \
+    "$LOCAL_CADDY_DIR/Caddyfile" \
+    "$SERVER:$REMOTE_CADDY_DIR/Caddyfile"
+
+  ssh "$SERVER" bash -s << 'EOF'
+set -euo pipefail
+
+STAGED="/srv/caddy/Caddyfile"
+LIVE="/etc/caddy/Caddyfile"
+SECRETS="/etc/caddy/secrets/credentials.env"
+BACKUP="/etc/caddy/Caddyfile.backup"
+
+echo "==> Checking Caddy credentials"
+sudo test -f "$SECRETS"
+
+# Validate using the same secret variables Caddy expects.
+echo "==> Validating staged Caddyfile"
+sudo bash -c '
+  set -euo pipefail
+  set -a
+  source /etc/caddy/secrets/credentials.env
+  set +a
+  caddy validate --config /srv/caddy/Caddyfile --adapter caddyfile
+'
+
+echo "==> Backing up current configuration"
+sudo cp -p "$LIVE" "$BACKUP"
+
+echo "==> Installing new configuration"
+sudo install -o root -g caddy -m 640 "$STAGED" "$LIVE"
+
+echo "==> Reloading Caddy"
+if sudo systemctl reload caddy && \
+   sudo systemctl is-active --quiet caddy; then
+  echo "==> Caddy deployed successfully"
+else
+  echo "ERROR: Caddy reload failed; restoring previous configuration"
+  sudo cp -p "$BACKUP" "$LIVE"
+  sudo systemctl reload caddy || true
+  exit 1
+fi
+EOF
+
+  echo "==> Caddy deploy complete"
+  exit 0
+fi
+
+# -----------------------------
 # ALL DEPLOY
 # -----------------------------
 if [[ "$SERVICE" == "all" ]]; then
+  echo "==> Deploying ALL docker + services + caddy"
 
-  echo "==> Deploying ALL docker + services"
-
-  "$0" docker
-  "$0" services
+  "$SCRIPT_DIR/deploy.sh" docker
+  "$SCRIPT_DIR/deploy.sh" services
+  "$SCRIPT_DIR/deploy.sh" caddy
 
   echo "==> Full deploy complete"
   exit 0
 fi
 
 # -----------------------------
-# DOCKER MODE (deploy all docker stacks)
+# DOCKER MODE (all stacks)
 # -----------------------------
 if [[ "$SERVICE" == "docker" ]]; then
-
   echo "==> Deploying all docker services"
 
   rsync -avz \
@@ -73,8 +142,8 @@ set -euo pipefail
 cd /srv/docker
 
 for dir in */ ; do
-  if [ -f "$dir/docker-compose.yml" ]; then
-    echo "-> restarting $dir"
+  if [[ -f "$dir/docker-compose.yml" ]]; then
+    echo "-> deploying $dir"
     docker compose -f "$dir/docker-compose.yml" up -d --remove-orphans
   fi
 done
@@ -85,27 +154,26 @@ EOF
 fi
 
 # -----------------------------
-# SERVICES MODE (systemd services)
+# SERVICES MODE (all systemd services)
 # -----------------------------
 if [[ "$SERVICE" == "services" ]]; then
-
   echo "==> Deploying all systemd services"
 
   rsync -avz \
-    --exclude 'venv/' \
-    --exclude '__pycache__/' \
-    --exclude '*.pyc' \
+    --exclude='venv/' \
+    --exclude='__pycache__/' \
+    --exclude='*.pyc' \
     "$LOCAL_SERVICES_DIR/" \
     "$SERVER:$REMOTE_SERVICES_DIR/"
 
-ssh "$SERVER" bash -s << 'EOF'
+  ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
 
 for dir in /srv/services/*/ ; do
   service=$(basename "$dir")
   unit="/srv/services/$service/$service.service"
 
-  if [ -f "$unit" ]; then
+  if [[ -f "$unit" ]]; then
     echo "-> installing $service.service"
     sudo install -m 644 "$unit" "/etc/systemd/system/$service.service"
   fi
@@ -133,24 +201,23 @@ fi
 # -----------------------------
 echo "==> Target deploy: $SERVICE"
 
-# ---- Docker service
+# ---- Single Docker service
 if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
-
   echo "==> Docker service detected: $SERVICE"
 
   rsync -avz \
-    --exclude 'venv/' \
-    --exclude '__pycache__/' \
-    --exclude '*.pyc' \
+    --exclude='venv/' \
+    --exclude='__pycache__/' \
+    --exclude='*.pyc' \
     "$LOCAL_DOCKER_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_DOCKER_DIR/$SERVICE/"
 
-  ssh "$SERVER" bash -s -- "$SERVICE" << EOF
+  ssh "$SERVER" bash -s -- "$SERVICE" << 'EOF'
 set -euo pipefail
 
 SERVICE="$1"
 
-cd /srv/docker/$SERVICE
+cd "/srv/docker/$SERVICE"
 docker compose pull
 docker compose up -d --remove-orphans
 EOF
@@ -159,15 +226,14 @@ EOF
   exit 0
 fi
 
-# ---- Systemd service
+# ---- Single systemd service
 if [[ -d "$LOCAL_SERVICES_DIR/$SERVICE" ]]; then
-
   echo "==> Systemd service detected: $SERVICE"
 
   rsync -avz \
-    --exclude 'venv/' \
-    --exclude '__pycache__/' \
-    --exclude '*.pyc' \
+    --exclude='venv/' \
+    --exclude='__pycache__/' \
+    --exclude='*.pyc' \
     "$LOCAL_SERVICES_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_SERVICES_DIR/$SERVICE/"
 
@@ -178,18 +244,14 @@ SERVICE="$1"
 
 cd "/srv/services/$SERVICE"
 
-# -----------------------------
-# Ensure venv exists
-# -----------------------------
-if [ ! -d "venv" ]; then
+# Ensure virtual environment exists.
+if [[ ! -d "venv" ]]; then
   echo "==> Creating venv"
   python3 -m venv venv
 fi
 
-# -----------------------------
-# Install dependencies
-# -----------------------------
-if [ -f "requirements.txt" ]; then
+# Install dependencies.
+if [[ -f "requirements.txt" ]]; then
   echo "==> Installing dependencies"
 
   ./venv/bin/python -m ensurepip --upgrade || true
@@ -199,14 +261,13 @@ else
   echo "WARNING: No requirements.txt found for $SERVICE"
 fi
 
-# -----------------------------
-# Install systemd unit
-# -----------------------------
-if [ -f "$SERVICE.service" ]; then
+# Install systemd unit.
+if [[ -f "$SERVICE.service" ]]; then
   echo "==> Installing systemd unit"
-sudo /usr/local/sbin/install-systemd-unit \
-  "/srv/services/$SERVICE/$SERVICE.service" \
-  "$SERVICE.service"
+
+  sudo /usr/local/sbin/install-systemd-unit \
+    "/srv/services/$SERVICE/$SERVICE.service" \
+    "$SERVICE.service"
 fi
 
 sudo systemctl daemon-reload
@@ -217,7 +278,6 @@ sudo systemctl restart "$SERVICE"
 echo "==> Checking $SERVICE status"
 sudo systemctl is-active --quiet "$SERVICE"
 sudo systemctl status "$SERVICE" --no-pager
-
 EOF
 
   echo "==> Systemd service deployed"
