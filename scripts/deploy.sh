@@ -68,6 +68,9 @@ if [[ "$SERVICE" == "caddy" ]]; then
     "$LOCAL_CADDY_DIR/Caddyfile" \
     "$SERVER:$REMOTE_CADDY_DIR/Caddyfile"
 
+# Authenticate sudo interactively before deployment.
+ssh -t "$SERVER" 'sudo -v'
+  
   ssh "$SERVER" bash -s << 'EOF'
 set -euo pipefail
 
