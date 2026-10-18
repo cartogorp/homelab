@@ -62,53 +62,15 @@ if [[ "$SERVICE" == "caddy" ]]; then
     exit 1
   }
 
+  # Stage the Git-managed configuration.
   ssh "$SERVER" "mkdir -p '$REMOTE_CADDY_DIR'"
 
   rsync -avz \
     "$LOCAL_CADDY_DIR/Caddyfile" \
     "$SERVER:$REMOTE_CADDY_DIR/Caddyfile"
 
-# Authenticate sudo interactively before deployment.
-ssh -t "$SERVER" 'sudo -v'
-  
-  ssh "$SERVER" bash -s << 'EOF'
-set -euo pipefail
-
-STAGED="/srv/caddy/Caddyfile"
-LIVE="/etc/caddy/Caddyfile"
-SECRETS="/etc/caddy/secrets/credentials.env"
-BACKUP="/etc/caddy/Caddyfile.backup"
-
-echo "==> Checking Caddy credentials"
-sudo test -f "$SECRETS"
-
-# Validate using the same secret variables Caddy expects.
-echo "==> Validating staged Caddyfile"
-sudo bash -c '
-  set -euo pipefail
-  set -a
-  source /etc/caddy/secrets/credentials.env
-  set +a
-  caddy validate --config /srv/caddy/Caddyfile --adapter caddyfile
-'
-
-echo "==> Backing up current configuration"
-sudo cp -p "$LIVE" "$BACKUP"
-
-echo "==> Installing new configuration"
-sudo install -o root -g caddy -m 640 "$STAGED" "$LIVE"
-
-echo "==> Reloading Caddy"
-if sudo systemctl reload caddy && \
-   sudo systemctl is-active --quiet caddy; then
-  echo "==> Caddy deployed successfully"
-else
-  echo "ERROR: Caddy reload failed; restoring previous configuration"
-  sudo cp -p "$BACKUP" "$LIVE"
-  sudo systemctl reload caddy || true
-  exit 1
-fi
-EOF
+  # Privileged validation, installation, and reload.
+  ssh "$SERVER" sudo -n /usr/local/sbin/deploy-caddy
 
   echo "==> Caddy deploy complete"
   exit 0
