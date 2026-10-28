@@ -1,0 +1,75 @@
+name: steam-headless
+
+services:
+  desktop:
+    image: josh5/steam-headless:2
+    container_name: steam-headless
+    hostname: steam-headless
+
+    profiles:
+      - gaming
+
+    restart: "no"
+    network_mode: host
+
+    # Capabilities required by Steam Headless
+    cap_add:
+      - DAC_READ_SEARCH
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_NICE
+      - SYS_PTRACE
+
+    security_opt:
+      - apparmor:unconfined
+      - seccomp=unconfined
+      - systempaths=unconfined
+      - writable-cgroups=true
+
+    cgroup: private
+    stop_signal: SIGRTMIN+3
+    stop_grace_period: 30s
+    pids_limit: 8192
+    shm_size: 2gb
+    tty: true
+
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/Toronto
+      COMPOSITOR_RENDER_DEVICE: /dev/dri/renderD128
+      ENCODER_RENDER_DEVICE: /dev/dri/renderD128
+
+    # Intel GPU and virtual input
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/fuse:/dev/fuse
+      - /dev/uinput:/dev/uinput
+      - /dev/uhid:/dev/uhid
+
+    device_cgroup_rules:
+      - 'c 13:* rwm'
+
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+      - /dev/input:rw,dev,mode=0755
+
+    volumes:
+      - /etc/localtime:/run/host-localtime:ro
+      - /sys/devices/virtual/input:/sys/devices/virtual/input:ro
+
+      # Persistent application state
+      - steam-state:/var/lib/steam-headless
+      - steam-journal:/var/log/journal
+
+      # Steam configuration, Proton prefixes, saves
+      - /srv/appdata/steam-headless/home:/home/steamheadless
+
+      # Steam game library
+      - /srv/games:/mnt/games
+
+volumes:
+  steam-state:
+  steam-journal:
