@@ -20,6 +20,7 @@ LOCAL_CADDY_DIR="./caddy"
 REMOTE_CADDY_DIR="/srv/caddy"
 
 SERVICE="${1:-all}"
+PROFILE="${2:-}"
 
 echo "==> Deploy mode: $SERVICE"
 
@@ -177,14 +178,21 @@ if [[ -d "$LOCAL_DOCKER_DIR/$SERVICE" ]]; then
     "$LOCAL_DOCKER_DIR/$SERVICE/" \
     "$SERVER:$REMOTE_DOCKER_DIR/$SERVICE/"
 
-  ssh "$SERVER" bash -s -- "$SERVICE" << 'EOF'
+  ssh "$SERVER" bash -s -- "$SERVICE" "$PROFILE" << 'EOF'
 set -euo pipefail
 
 SERVICE="$1"
+PROFILE="${2:-}"
 
 cd "/srv/docker/$SERVICE"
-docker compose pull
-docker compose up -d --remove-orphans
+
+if [[ -n "$PROFILE" ]]; then
+  docker compose --profile "$PROFILE" pull
+  docker compose --profile "$PROFILE" up -d --remove-orphans
+else
+  docker compose pull
+  docker compose up -d --remove-orphans
+fi
 EOF
 
   echo "==> Docker service deployed"
